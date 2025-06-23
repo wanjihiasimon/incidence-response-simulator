@@ -89,13 +89,15 @@
       justify-content: center;
       gap: 20px;
       margin-top: 10px;
-      flex-wrap: wrap;
+      flex-wrap: nowrap;
       cursor: grab;
-      overflow: auto;
+      overflow-x: auto;
+      padding: 10px;
     }
 
     .icon-flow div {
       text-align: center;
+      min-width: 60px;
     }
 
     .icon-flow i {
@@ -111,14 +113,6 @@
     @keyframes fadeIn {
       from { opacity: 0; transform: translateY(20px); }
       to { opacity: 1; transform: translateY(0); }
-    }
-
-    svg.network-map {
-      width: 100%;
-      height: 300px;
-      margin-top: 20px;
-      border: 1px solid #ccc;
-      background-color: #fff;
     }
   </style>
 </head>
@@ -147,7 +141,51 @@
           { icon: "fa-lock", label: "SOC Alert" }
         ]
       },
-      // other scenarios remain unchanged...
+      {
+        question: "An employee plugs in an unknown USB drive found in the office. What should you do next?",
+        options: [
+          { text: "Run antivirus on the USB.", correct: false },
+          { text: "Isolate the PC and inform the SOC.", correct: true },
+          { text: "Ignore it.", correct: false },
+        ],
+        diagram: "Threat Flow: USB → Malware → Host PC → Network Spread",
+        flowIcons: [
+          { icon: "fa-usb", label: "USB Device" },
+          { icon: "fa-bug", label: "Malware" },
+          { icon: "fa-desktop", label: "Host PC" },
+          { icon: "fa-network-wired", label: "Internal Network" }
+        ]
+      },
+      {
+        question: "A user reports slow system behavior and ransom note pop-up. How do you respond?",
+        options: [
+          { text: "Pay the ransom to recover files.", correct: false },
+          { text: "Disconnect the system and notify IR team.", correct: true },
+          { text: "Reboot the machine.", correct: false },
+        ],
+        diagram: "Threat Flow: Infection → Encryption → Notification → Response",
+        flowIcons: [
+          { icon: "fa-laptop", label: "User Laptop" },
+          { icon: "fa-lock", label: "Encryption" },
+          { icon: "fa-bell", label: "Alert" },
+          { icon: "fa-shield-alt", label: "IR Team" }
+        ]
+      },
+      {
+        question: "An unknown process is sending large data to external IPs. What is your priority?",
+        options: [
+          { text: "Shut down all internet connectivity.", correct: false },
+          { text: "Identify the process and block exfiltration path.", correct: true },
+          { text: "Restart the affected system.", correct: false },
+        ],
+        diagram: "Threat Flow: Internal Host → Data Theft → External IP",
+        flowIcons: [
+          { icon: "fa-server", label: "Compromised Server" },
+          { icon: "fa-database", label: "Sensitive Data" },
+          { icon: "fa-cloud-upload-alt", label: "Data Exfiltration" },
+          { icon: "fa-globe", label: "External IP" }
+        ]
+      }
     ];
 
     let current = 0;
