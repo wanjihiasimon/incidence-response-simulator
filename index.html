@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Incident Response Simulation</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #f4f7f9;
+      margin: 0;
+      padding: 0;
+      color: #333;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: auto;
+      padding: 20px;
+    }
+
+    h1 {
+      text-align: center;
+      color: #0a66c2;
+    }
+
+    .scenario-card {
+      background-color: #ffffff;
+      border-radius: 10px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+      padding: 20px;
+      margin-bottom: 20px;
+      transition: 0.3s ease;
+    }
+
+    .scenario-card h2 {
+      color: #ff5722;
+    }
+
+    .options {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-top: 15px;
+    }
+
+    .options button {
+      padding: 10px 15px;
+      border: none;
+      border-radius: 8px;
+      background-color: #0a66c2;
+      color: white;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+
+    .options button:hover {
+      background-color: #084a96;
+    }
+
+    .result {
+      font-weight: bold;
+      margin-top: 10px;
+    }
+
+    .score-board {
+      text-align: center;
+      font-size: 20px;
+      margin-top: 30px;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <h1>Incident Response Simulation Tool</h1>
+    <div id="simulator"></div>
+    <div class="score-board" id="scoreBoard"></div>
+  </div>
+
+  <script>
+    const scenarios = [
+      {
+        question: "A user reports receiving a suspicious email asking for login credentials. What should you do first?",
+        options: [
+          { text: "Quarantine the user's PC immediately.", correct: false },
+          { text: "Notify the SOC team and instruct the user not to click any links.", correct: true },
+          { text: "Ignore it until more users are affected.", correct: false },
+        ]
+      },
+      {
+        question: "A malware alert is triggered by the EDR system on a workstation. What is your next step?",
+        options: [
+          { text: "Disconnect the device from the network.", correct: true },
+          { text: "Format the hard drive right away.", correct: false },
+          { text: "Continue monitoring and take no action.", correct: false },
+        ]
+      },
+      {
+        question: "Logs show repeated failed login attempts from a foreign IP. What action should be taken?",
+        options: [
+          { text: "Block the IP address and review firewall rules.", correct: true },
+          { text: "Shut down the server.", correct: false },
+          { text: "Reset all user passwords immediately.", correct: false },
+        ]
+      },
+      {
+        question: "During investigation, you discover unauthorized software running on a server. What's the next step?",
+        options: [
+          { text: "Document the finding and uninstall the software.", correct: true },
+          { text: "Ignore it, it might be a false positive.", correct: false },
+          { text: "Call law enforcement before internal review.", correct: false },
+        ]
+      },
+      {
+        question: "After containing a ransomware attack, what should be your next priority?",
+        options: [
+          { text: "Pay the ransom if data is critical.", correct: false },
+          { text: "Start restoring from backups and conducting impact analysis.", correct: true },
+          { text: "Reboot all systems immediately.", correct: false },
+        ]
+      },
+    ];
+
+    let current = 0;
+    let score = 0;
+
+    function renderScenario() {
+      const simDiv = document.getElementById("simulator");
+      simDiv.innerHTML = "";
+
+      if (current < scenarios.length) {
+        const scenario = scenarios[current];
+        const card = document.createElement("div");
+        card.className = "scenario-card";
+
+        const question = document.createElement("h2");
+        question.textContent = `Scenario ${current + 1}`;
+        card.appendChild(question);
+
+        const qText = document.createElement("p");
+        qText.textContent = scenario.question;
+        card.appendChild(qText);
+
+        const optionsDiv = document.createElement("div");
+        optionsDiv.className = "options";
+
+        scenario.options.forEach(option => {
+          const btn = document.createElement("button");
+          btn.textContent = option.text;
+          btn.onclick = () => {
+            const result = document.createElement("div");
+            result.className = "result";
+            if (option.correct) {
+              score++;
+              result.textContent = "✅ Correct";
+              result.style.color = "green";
+            } else {
+              result.textContent = "❌ Incorrect";
+              result.style.color = "red";
+            }
+            card.appendChild(result);
+
+            setTimeout(() => {
+              current++;
+              renderScenario();
+            }, 1500);
+          };
+          optionsDiv.appendChild(btn);
+        });
+
+        card.appendChild(optionsDiv);
+        simDiv.appendChild(card);
+      } else {
+        const board = document.getElementById("scoreBoard");
+        board.innerHTML = `✅ Simulation Complete! Your Score: <strong>${score}/${scenarios.length}</strong>`;
+      }
+    }
+
+    renderScenario();
+  </script>
+</body>
+
+</html>
