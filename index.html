@@ -26,6 +26,21 @@
       color: #0a66c2;
     }
 
+    .progress-bar {
+      height: 20px;
+      background-color: #d3e3fc;
+      border-radius: 10px;
+      overflow: hidden;
+      margin-bottom: 20px;
+    }
+
+    .progress-fill {
+      height: 100%;
+      width: 0;
+      background-color: #0a66c2;
+      transition: width 0.5s ease-in-out;
+    }
+
     .scenario-card {
       background-color: #ffffff;
       border-radius: 10px;
@@ -66,10 +81,25 @@
       margin-top: 10px;
     }
 
+    .audit-insight {
+      background-color: #fbe9e7;
+      border-left: 6px solid #ff7043;
+      padding: 10px;
+      margin-top: 10px;
+      font-style: italic;
+    }
+
     .score-board {
       text-align: center;
       font-size: 20px;
       margin-top: 30px;
+    }
+
+    .summary-box {
+      background-color: #fff3cd;
+      padding: 15px;
+      margin-top: 15px;
+      border-left: 6px solid #ffc107;
     }
   </style>
 </head>
@@ -77,6 +107,7 @@
 <body>
   <div class="container">
     <h1>Incident Response Simulation Tool</h1>
+    <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
     <div id="simulator"></div>
     <div class="score-board" id="scoreBoard"></div>
   </div>
@@ -89,7 +120,8 @@
           { text: "Quarantine the user's PC immediately.", correct: false },
           { text: "Notify the SOC team and instruct the user not to click any links.", correct: true },
           { text: "Ignore it until more users are affected.", correct: false },
-        ]
+        ],
+        audit: "Email filtering and regular phishing simulations can reduce user susceptibility."
       },
       {
         question: "A malware alert is triggered by the EDR system on a workstation. What is your next step?",
@@ -97,7 +129,8 @@
           { text: "Disconnect the device from the network.", correct: true },
           { text: "Format the hard drive right away.", correct: false },
           { text: "Continue monitoring and take no action.", correct: false },
-        ]
+        ],
+        audit: "Network segmentation and EDR alerts should be configured for auto-isolation."
       },
       {
         question: "Logs show repeated failed login attempts from a foreign IP. What action should be taken?",
@@ -105,7 +138,8 @@
           { text: "Block the IP address and review firewall rules.", correct: true },
           { text: "Shut down the server.", correct: false },
           { text: "Reset all user passwords immediately.", correct: false },
-        ]
+        ],
+        audit: "Firewall and IDS/IPS controls must detect brute-force attempts and geo-restrictions should apply."
       },
       {
         question: "During investigation, you discover unauthorized software running on a server. What's the next step?",
@@ -113,7 +147,8 @@
           { text: "Document the finding and uninstall the software.", correct: true },
           { text: "Ignore it, it might be a false positive.", correct: false },
           { text: "Call law enforcement before internal review.", correct: false },
-        ]
+        ],
+        audit: "Implement software allowlisting and regular vulnerability scans."
       },
       {
         question: "After containing a ransomware attack, what should be your next priority?",
@@ -121,7 +156,8 @@
           { text: "Pay the ransom if data is critical.", correct: false },
           { text: "Start restoring from backups and conducting impact analysis.", correct: true },
           { text: "Reboot all systems immediately.", correct: false },
-        ]
+        ],
+        audit: "Ensure offsite backups are immutable and regularly tested for restoration."
       },
       {
         question: "Your company is experiencing a DDoS attack. What should you do immediately?",
@@ -129,7 +165,8 @@
           { text: "Contact your ISP and enable DDoS protection services.", correct: true },
           { text: "Shut down all internet services.", correct: false },
           { text: "Ignore the alert and continue working.", correct: false },
-        ]
+        ],
+        audit: "Contract DDoS mitigation service and create a tested playbook for high availability."
       },
       {
         question: "An employee lost a company laptop with sensitive files. What is the correct first action?",
@@ -137,7 +174,8 @@
           { text: "Report the loss to IT security and initiate remote wipe if possible.", correct: true },
           { text: "Wait to see if the employee recovers it.", correct: false },
           { text: "Publicly announce the breach.", correct: false },
-        ]
+        ],
+        audit: "Encrypt devices and implement remote wipe + geo-tracking on endpoints."
       },
       {
         question: "You find out that backups have failed for over two weeks. What's your next action?",
@@ -145,16 +183,22 @@
           { text: "Notify IT management and prioritize restoring backup processes.", correct: true },
           { text: "Delete all existing backups to start fresh.", correct: false },
           { text: "Do nothing until next audit.", correct: false },
-        ]
+        ],
+        audit: "Automated backup monitoring with daily alerts and audit log reviews should be in place."
       }
     ];
 
     let current = 0;
     let score = 0;
+    let resultsSummary = [];
 
     function renderScenario() {
       const simDiv = document.getElementById("simulator");
+      const progress = document.getElementById("progressFill");
       simDiv.innerHTML = "";
+
+      const percentage = (current / scenarios.length) * 100;
+      progress.style.width = `${percentage}%`;
 
       if (current < scenarios.length) {
         const scenario = scenarios[current];
@@ -178,20 +222,35 @@
           btn.onclick = () => {
             const result = document.createElement("div");
             result.className = "result";
+            let feedback;
+
             if (option.correct) {
               score++;
-              result.textContent = "✅ Correct";
+              feedback = "✅ Correct";
               result.style.color = "green";
             } else {
-              result.textContent = "❌ Incorrect";
+              feedback = "❌ Incorrect";
               result.style.color = "red";
             }
+
+            result.textContent = feedback;
             card.appendChild(result);
+
+            const insight = document.createElement("div");
+            insight.className = "audit-insight";
+            insight.textContent = `🔍 Audit Insight: ${scenario.audit}`;
+            card.appendChild(insight);
+
+            resultsSummary.push({
+              scenario: current + 1,
+              correct: option.correct,
+              text: scenario.question
+            });
 
             setTimeout(() => {
               current++;
               renderScenario();
-            }, 1500);
+            }, 1800);
           };
           optionsDiv.appendChild(btn);
         });
@@ -201,6 +260,18 @@
       } else {
         const board = document.getElementById("scoreBoard");
         board.innerHTML = `✅ Simulation Complete! Your Score: <strong>${score}/${scenarios.length}</strong>`;
+
+        const summary = document.createElement("div");
+        summary.className = "summary-box";
+        summary.innerHTML = "<h3>Summary of Responses</h3>";
+
+        resultsSummary.forEach((res, idx) => {
+          const line = document.createElement("p");
+          line.innerHTML = `Scenario ${res.scenario}: <strong>${res.correct ? "Correct" : "Incorrect"}</strong>`;
+          summary.appendChild(line);
+        });
+
+        board.appendChild(summary);
       }
     }
 
